@@ -104,17 +104,14 @@
     </footer>
 
     <script>
+    // 1. Get User Info from LocalStorage
+    const role = (localStorage.getItem('role') || 'client').toLowerCase(); 
+    const clientName = (localStorage.getItem('clientName') || 'Guest').toLowerCase();
 
-
-        // Use local storage values to update the User Badge if they exist
-        <!-- const role = localStorage.getItem('role') || 'Operator'; -->
-        <!-- const clientName = localStorage.getItem('clientName') || ''; -->
-
-        const role = localStorage.getItem('role') || 'client';
-        const clientName = localStorage.getItem('clientName') || 'Guest';
-
+    // Update the UI Badge
         document.getElementById('userBadge').innerText = `${role.charAt(0).toUpperCase() + role.slice(1)}: ${clientName}`;
 
+    // 2. Full Data List
         const TANK_LIST = [
             { id: "tank1", name: "Main Storage Tank A", site: "Alpha", level: 100 },
             { id: "tank2", name: "High-High Demo", site: "Alpha", level: 98 },
@@ -128,37 +125,68 @@
             { id: "tank10", name: "Process Tank Y", site: "Epsilon", level: 96 }
         ];
 
-        function buildGrid() {
-            const container = document.getElementById('tankContainer');
-            container.innerHTML = TANK_LIST.map(tank => `
-                <div id="card-${tank.id}" onclick="window.location.href='details.html?id=${tank.id}'" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 overflow-hidden transition-all duration-500 hover:shadow-md cursor-pointer">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-800">${tank.name}</h3>
-                                <p class="text-xs text-gray-500 uppercase font-semibold">Site: ${tank.site}</p>
-                            </div>
-                            <span id="status-${tank.id}" class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 uppercase">INITIALIZING</span>
-                        </div>
+    // 3. FILTER LOGIC: Fix the filter to match your requirements
+    const filteredTanks = TANK_LIST.filter(tank => {
+        if (role === 'admin') return true; 
+        return tank.site.toLowerCase() === clientName;
+    });
 
-                        <div class="flex items-center justify-between">
-                            <div class="w-2/3">
-                                <div id="percent-${tank.id}" class="text-4xl font-black text-blue-600">0%</div>
-                                <p class="text-sm text-gray-400 mt-1">Current Liquid Level</p>
-                            </div>
-                            <div class="w-14 h-28 bg-gray-100 rounded-lg relative overflow-hidden border-2 border-gray-200">
-                                <div id="liquid-${tank.id}" class="liquid-shaking absolute bottom-0 opacity-80" style="height: 0%"></div>
-                            </div>
-                        </div>
+    // 4. BUILD GRID: Use filteredTanks instead of TANK_LIST
+function buildGrid() {
+    const container = document.getElementById('tankContainer');
+    const timeNow = document.getElementById('timeNow');
+    if(timeNow) timeNow.innerText = new Date().toLocaleTimeString();
 
-                        <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
-                            <span class="text-gray-500"><i class="fas fa-thermometer-half mr-1"></i> -25.0?C</span>
-                            <span class="text-blue-600 font-bold italic">View Details <i class="fas fa-chevron-right ml-1"></i></span>
+    if (filteredTanks.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-gray-400 py-10 italic">No tanks assigned to this site.</p>`;
+        return;
+    }
+
+    container.innerHTML = filteredTanks.map(tank => {
+        // Threshold Logic for Status and Colors
+        let colorClass = "bg-blue-500";
+        let statusText = "Normal";
+        let pulseClass = "";
+
+        if (tank.level >= 95) { colorClass = "bg-red-600"; statusText = "Critical High"; pulseClass = "blink-critical"; }
+        else if (tank.level >= 85) { colorClass = "bg-amber-500"; statusText = "Warning High"; }
+        else if (tank.level <= 5) { colorClass = "bg-red-600"; statusText = "Critical Low"; pulseClass = "blink-critical"; }
+        else if (tank.level <= 20) { colorClass = "bg-amber-500"; statusText = "Advisory Low"; }
+
+        return `
+            <div id="card-${tank.id}" onclick="window.location.href='details.html?id=${tank.id}'" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 overflow-hidden transition-all duration-500 hover:shadow-md cursor-pointer">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800 leading-tight">${tank.name}</h3>
+                            <p class="text-xs text-gray-500 uppercase font-semibold">Site: ${tank.site}</p>
+                        </div>
+                        <span id="status-${tank.id}" class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 uppercase">${statusText}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="w-2/3">
+                            <div id="percent-${tank.id}" class="text-4xl font-black text-blue-600">${tank.level}%</div>
+                            <p class="text-sm text-gray-400 mt-1">Current Liquid Level</p>
+                        </div>
+                        <div class="w-14 h-28 bg-gray-100 rounded-lg relative overflow-hidden border-2 border-gray-200">
+                            <div id="liquid-${tank.id}" class="liquid-shaking absolute bottom-0 opacity-80 ${colorClass} ${pulseClass}" style="height: ${tank.level}%"></div>
                         </div>
                     </div>
+                    <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+                        <span class="text-gray-500">
+                            <i class="fas fa-thermometer-half mr-1"></i> -25.0°C 
+                        </span>
+                        <span class="text-blue-600 font-bold italic">View Details <i class="fas fa-chevron-right ml-1"></i>
+                        </span>
+                    </div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `;
+    }).join('');
+}
+
+
+
 
         function updateUI() {
             document.getElementById('timeNow').innerText = new Date().toLocaleTimeString();
