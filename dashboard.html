@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fixed FontAwesome Link -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+
+        /* Your Custom Padding Override */
+        .py-4 {
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.2rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.2rem !important;
+        }
+
+        /* Shaking Animation from details.html */
+        @keyframes wave-shake {
+            0% { transform: translateX(-50%) skewY(-4deg); }
+            50% { transform: translateX(-50%) skewY(4deg); }
+            100% { transform: translateX(-50%) skewY(-4deg); }
+        }
+
+        .liquid-shaking {
+            width: 200%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: wave-shake 3s ease-in-out infinite;
+            transition: height 1s linear, background-color 0.5s ease;
+        }
+
+        .blink-critical {
+            animation: blinker 0.8s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+        }
+
+        @keyframes blinker {
+            from { opacity: 1; }
+            to { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-40">
+
+    <!-- Navigation Bar Updated with Badge, Alerts, and Logout -->
+    <nav class="bg-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-industry text-2xl text-blue-300"></i>
+                <span class="font-bold text-xl tracking-tight">XXX Telemetry Cloud</span>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- User Badge -->
+                <div id="userBadge" class="bg-blue-700 px-3 py-1 rounded-full text-sm font-medium">Operator</div>
+
+                <!-- Alerts Link -->
+                <a href="alerts.html" class="text-blue-200 hover:text-white transition flex items-center gap-2">
+                    <i class="fas fa-bell"></i>
+                    <span class="hidden sm:inline">Alerts</span>
+                </a>
+
+                <!-- Logout Link -->
+                <a href="index.html" class="text-blue-200 hover:text-white transition flex items-center gap-2 border-l border-blue-700 pl-4">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-900">Live Monitoring</h2>
+                <p class="text-gray-500 mt-1">Dynamic Shaking Visualization (10 Tanks)</p>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <span class="w-2 h-2 mr-2 bg-green-500 rounded-full animate-pulse"></span> System Live
+                </span>
+                <p class="text-xs text-gray-400 mt-1">Last Update: <span id="timeNow"></span></p>
+            </div>
+        </div>
+
+        <div id="tankContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <footer class="fixed bottom-0 w-full bg-white border-t border-gray-200 py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+        <div class="max-w-7xl mx-auto">
+            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Threshold Reference Guide</h4>
+            <div class="grid grid-cols-2 md:flex md:justify-between items-start gap-4">
+                <div class="flex items-start gap-3"><div class="w-4 h-4 bg-red-600 rounded-sm mt-1 animate-pulse"></div><div><p class="text-xs font-bold text-gray-800">Critical High</p><p class="text-[10px] text-gray-400">≥ 95%</p></div></div>
+                <div class="flex items-start gap-3"><div class="w-4 h-4 bg-amber-500 rounded-sm mt-1"></div><div><p class="text-xs font-bold text-gray-800">Warning High</p><p class="text-[10px] text-gray-400">85% - 94%</p></div></div>
+                <div class="flex items-start gap-3"><div class="w-4 h-4 bg-blue-500 rounded-sm mt-1"></div><div><p class="text-xs font-bold text-gray-800">Normal Range</p><p class="text-[10px] text-gray-400">21% - 84%</p></div></div>
+                <div class="flex items-start gap-3"><div class="w-4 h-4 bg-amber-500 rounded-sm mt-1"></div><div><p class="text-xs font-bold text-gray-800">Advisory Low</p><p class="text-[10px] text-gray-400">6% - 20%</p></div></div>
+                <div class="flex items-start gap-3"><div class="w-4 h-4 bg-red-600 rounded-sm mt-1 animate-pulse"></div><div><p class="text-xs font-bold text-gray-800">Critical Low</p><p class="text-[10px] text-gray-400">≤ 5%</p></div></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+
+        // Use local storage values to update the User Badge if they exist
+        <!-- const role = localStorage.getItem('role') || 'Operator'; -->
+        <!-- const clientName = localStorage.getItem('clientName') || ''; -->
+
+        const role = localStorage.getItem('role') || 'client';
+        const clientName = localStorage.getItem('clientName') || 'Guest';
+
+        document.getElementById('userBadge').innerText = `${role.charAt(0).toUpperCase() + role.slice(1)}: ${clientName}`;
+
+        const TANK_LIST = [
+            { id: "tank1", name: "Main Storage Tank A", site: "Alpha", level: 100 },
+            { id: "tank2", name: "High-High Demo", site: "Alpha", level: 98 },
+            { id: "tank3", name: "High-Warn Demo", site: "Beta", level: 88 },
+            { id: "tank4", name: "Normal Demo", site: "Beta", level: 55 },
+            { id: "tank5", name: "Low-Advisory Demo", site: "Gamma", level: 18 },
+            { id: "tank6", name: "Low-Low Demo", site: "Gamma", level: 4 },
+            { id: "tank7", name: "Backup Tank 01", site: "Delta", level: 42 },
+            { id: "tank8", name: "Backup Tank 02", site: "Delta", level: 91 },
+            { id: "tank9", name: "Process Tank X", site: "Epsilon", level: 12 },
+            { id: "tank10", name: "Process Tank Y", site: "Epsilon", level: 96 }
+        ];
+
+        function buildGrid() {
+            const container = document.getElementById('tankContainer');
+            container.innerHTML = TANK_LIST.map(tank => `
+                <div id="card-${tank.id}" onclick="window.location.href='details.html?id=${tank.id}'" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 overflow-hidden transition-all duration-500 hover:shadow-md cursor-pointer">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">${tank.name}</h3>
+                                <p class="text-xs text-gray-500 uppercase font-semibold">Site: ${tank.site}</p>
+                            </div>
+                            <span id="status-${tank.id}" class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 uppercase">INITIALIZING</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="w-2/3">
+                                <div id="percent-${tank.id}" class="text-4xl font-black text-blue-600">0%</div>
+                                <p class="text-sm text-gray-400 mt-1">Current Liquid Level</p>
+                            </div>
+                            <div class="w-14 h-28 bg-gray-100 rounded-lg relative overflow-hidden border-2 border-gray-200">
+                                <div id="liquid-${tank.id}" class="liquid-shaking absolute bottom-0 opacity-80" style="height: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+                            <span class="text-gray-500"><i class="fas fa-thermometer-half mr-1"></i> -25.0?C</span>
+                            <span class="text-blue-600 font-bold italic">View Details <i class="fas fa-chevron-right ml-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateUI() {
+            document.getElementById('timeNow').innerText = new Date().toLocaleTimeString();
+
+            TANK_LIST.forEach((tank) => {
+                if (tank.id === "tank1" && tank.level > 5) {
+                    tank.level = Math.max(5, tank.level - 1); // Slowed down consumption for realism
+                }
+
+                const level = tank.level;
+                const card = document.getElementById(`card-${tank.id}`);
+                const status = document.getElementById(`status-${tank.id}`);
+                const percent = document.getElementById(`percent-${tank.id}`);
+                const liquid = document.getElementById(`liquid-${tank.id}`);
+
+                let config = { msg: "NORMAL", color: "bg-blue-500", text: "text-blue-600", border: "border-gray-200", blink: false };
+
+                if (level >= 95) {
+                    config = { msg: "CRITICAL HIGH", color: "bg-red-600", text: "text-red-600", border: "border-red-500", blink: true };
+                } else if (level >= 85) {
+                    config = { msg: "WARNING HIGH", color: "bg-amber-500", text: "text-amber-600", border: "border-amber-400", blink: false };
+                } else if (level <= 5) {
+                    config = { msg: "CRITICAL LOW", color: "bg-red-600", text: "text-red-600", border: "border-red-500", blink: true };
+                } else if (level <= 20) {
+                    config = { msg: "ADVISORY LOW", color: "bg-amber-500", text: "text-amber-600", border: "border-amber-400", blink: false };
+                }
+
+                status.innerText = config.msg;
+                status.className = `text-[10px] font-bold px-2 py-1 rounded uppercase ${config.color} text-white`;
+                percent.innerText = `${level}%`;
+                percent.className = `text-4xl font-black ${config.text}`;
+                liquid.style.height = `${level}%`;
+                liquid.className = `liquid-shaking absolute bottom-0 opacity-80 ${config.color}`;
+                card.className = `bg-white rounded-xl shadow-sm border-2 ${config.border} overflow-hidden transition-all duration-500 hover:shadow-md cursor-pointer ${config.blink ? 'blink-critical' : ''}`;
+            });
+        }
+
+        // Initialize and Run
+        buildGrid();
+        setInterval(updateUI, 1000);
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Settings | Telemetry Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="dashboard.html" class="text-slate-400 hover:text-white transition"><i class="fas fa-home"></i></a>
+                <span class="text-slate-500">/</span>
+                <span class="font-bold text-sm uppercase tracking-widest text-blue-400">Security & Alerts</span>
+            </div>
+            <div id="roleBadge" class="text-xs font-bold bg-slate-700 px-3 py-1 rounded-full border border-slate-600"></div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto py-10 px-4">
+
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-slate-800">Notification Rules</h2>
+            <p class="text-slate-500">Configure how the system reacts when tank levels reach critical points.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8">
+
+            <!-- Threshold Configuration Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-700 flex items-center">
+                        <i class="fas fa-sliders-h mr-2 text-blue-500"></i> Level Thresholds
+                    </h3>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Critical Low -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="font-bold text-red-600">Critical Low Level</p>
+                            <p class="text-xs text-slate-400">Trigger immediate emergency alert</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="critRange" min="0" max="100" value="15"
+                                class="w-48 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600">
+                            <span id="critValue" class="bg-red-50 text-red-700 font-mono font-bold px-3 py-1 rounded border border-red-200">15%</span>
+                        </div>
+                    </div>
+
+                    <!-- Warning Low -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6 border-t border-slate-50">
+                        <div>
+                            <p class="font-bold text-amber-600">Warning Level</p>
+                            <p class="text-xs text-slate-400">Notify for scheduled refill</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="warnRange" min="0" max="100" value="30"
+                                class="w-48 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                            <span id="warnValue" class="bg-amber-50 text-amber-700 font-mono font-bold px-3 py-1 rounded border border-amber-200">30%</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Notification Channels -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-700 flex items-center">
+                        <i class="fas fa-bell mr-2 text-blue-500"></i> Dispatch Channels
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <!-- LINE Notify (Common in Thailand) -->
+                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fab fa-line text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-green-800">LINE Notify</p>
+                                <p class="text-xs text-green-600">Send alerts to Client & Admin groups</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        </label>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-envelope text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-blue-800">Email Reports</p>
+                                <p class="text-xs text-blue-600">Daily summary at 08:00 AM</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="alert('Settings Saved Successfully!')" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold hover:bg-slate-900 transition shadow-lg">
+                Update Configuration
+            </button>
+
+        </div>
+    </main>
+
+    <script>
+        // Display role for the demo
+        const role = localStorage.getItem('role') || 'client';
+        document.getElementById('roleBadge').innerText = role.toUpperCase() + ' MODE';
+    </script>
+
+    <script>
+        // Slider Logic for Demo
+        const critRange = document.getElementById('critRange');
+        const critValue = document.getElementById('critValue');
+        critRange.oninput = function() { critValue.innerHTML = this.value + "%"; }
+
+        const warnRange = document.getElementById('warnRange');
+        const warnValue = document.getElementById('warnValue');
+        warnRange.oninput = function() { warnValue.innerHTML = this.value + "%"; }
+    </script>
+
+</body>
+</html>
